@@ -31,11 +31,11 @@ public class SendMailTask extends AsyncTask {
             GMail androidEmail = new GMail(args[0].toString(),
                     args[1].toString(), args[2].toString(), args[3].toString(),
                     args[4].toString());
-            publishProgress("Preparing mail message....");
+            publishProgress("Preparing SMS message....");
             androidEmail.createEmailMessage();
-            publishProgress("Sending email....");
+            publishProgress("Sending message....");
             androidEmail.sendEmail();
-            publishProgress("Email Sent.");
+            publishProgress("SMS sent!");
             Log.i("SendMailTask", "Mail Sent.");
 
 
@@ -55,6 +55,7 @@ public class SendMailTask extends AsyncTask {
     @Override
     public void onPostExecute(Object result) {
         statusDialog.dismiss();
+
     }
 
 }

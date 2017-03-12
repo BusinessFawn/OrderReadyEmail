@@ -25,6 +25,14 @@
         android:layout_height="wrap_content"
         android:id="@+id/et_email_body"
         android:hint="Body..."/>
+
+    <AutoCompleteTextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Ip..."
+        android:singleLine="true"
+        android:id="@+id/et_ip_value" />
+
     <Button
         android:layout_width="64dp"
         android:layout_height="64dp"
