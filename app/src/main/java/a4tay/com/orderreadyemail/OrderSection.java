@@ -53,6 +53,15 @@ public class OrderSection extends Fragment {
     RecyclerView orderRecyclerView;
     public static int staticPort = 4060;
     public static String staticIP = "dev.4tay.xyz";
+    private String emailAddress;
+    private String password;
+    private static final String LOG_TAG = OrderSection.class.getSimpleName();
+
+    @Override
+    public void onResume() {
+        super.onResume();
+        new LoadEmailAndPassword().execute();
+    }
 
 
 
@@ -148,9 +157,7 @@ public class OrderSection extends Fragment {
                         // remove from adapter
                         Log.d("LOG", "Completed!!!");
                         int position = viewHolder.getAdapterPosition();
-
-                        String fromEmail = "4tay.studio@gmail.com";
-                        String fromPassword = "h4ll0W##N";
+                        
                         String subject;
                         String body;
 
@@ -173,35 +180,45 @@ public class OrderSection extends Fragment {
 
 
 
-                                Log.d("LOG", fromEmail + " " + fromPassword + " " + (transactionArrayList.get(position).getPhone() + transactionArrayList.get(position).getCarrier()) + " " + subject + " " + body + transactionArrayList.get(position).getOrder());
+                                //Log.d("LOG", fromEmail + " " + fromPassword + " " + (transactionArrayList.get(position).getPhone() + transactionArrayList.get(position).getCarrier()) + " " + subject + " " + body + transactionArrayList.get(position).getOrder());
+                                new GetOrdersTask().execute(transactionArrayList.get(position).getOrder() + ".json");
+
+                                transactionArrayList.remove(position);
+
+                        /*orderRecyclerAdapter.notifyItemRemoved(position);
+                        orderRecyclerAdapter.notifyItemRangeChanged(position, transactionArrayList.size());*/
+
+                                refreshOrderList();
                                 break;
                             case 32:
                                 whatWay = "right";
 
-                                Log.d("LOG", fromEmail + " " + fromPassword + " " + (transactionArrayList.get(position).getPhone() + transactionArrayList.get(position).getCarrier()) + " " + subject + " " + body + transactionArrayList.get(position).getOrder());
+                                if(emailAddress != null && !emailAddress.equals("") && password != null && !password.equals("")) {
 
-                                new SendMailTask(getActivity()).execute(fromEmail,
-                                        fromPassword, (transactionArrayList.get(position).getPhone() + transactionArrayList.get(position).getCarrier()),
-                                        subject,
-                                        body + transactionArrayList.get(position).getOrder());
+                                    Log.d("LOG", emailAddress + " " + password + " " + (transactionArrayList.get(position).getPhone() + transactionArrayList.get(position).getCarrier()) + " " + subject + " " + body + transactionArrayList.get(position).getOrder());
+
+                                    new SendMailTask(getActivity()).execute(emailAddress,
+                                            password, (transactionArrayList.get(position).getPhone() + transactionArrayList.get(position).getCarrier()),
+                                            subject,
+                                            body + transactionArrayList.get(position).getOrder());
 
 
+                                    Toast.makeText(getContext(), "Trans: " + transactionArrayList.get(position).getOrder() + " sent!", Toast.LENGTH_SHORT).show();
+                                    new GetOrdersTask().execute(transactionArrayList.get(position).getOrder() + ".json");
 
-                                Toast.makeText(getContext(),"Trans: " + transactionArrayList.get(position).getOrder() + " sent!",Toast.LENGTH_SHORT).show();
+                                    transactionArrayList.remove(position);
+                                    refreshOrderList();
+                                } else {
+                                    Toast.makeText(getContext(), "Please set email address and password in settings", Toast.LENGTH_SHORT).show();
+                                    refreshOrderList();
+                                }
 
                                 break;
                         }
                         Log.d("Order Section", whatWay);
 
 
-                        new GetOrdersTask().execute(transactionArrayList.get(position).getOrder() + ".json");
 
-                        transactionArrayList.remove(position);
-
-                        /*orderRecyclerAdapter.notifyItemRemoved(position);
-                        orderRecyclerAdapter.notifyItemRangeChanged(position, transactionArrayList.size());*/
-
-                        refreshOrderList();
                     }
 
                     @Override
@@ -284,6 +301,8 @@ public class OrderSection extends Fragment {
         new GetOrdersTask().execute(request);*/
 
         new GetOrdersTask().execute("orders");
+
+        new LoadEmailAndPassword().execute();
 
 
         return orderView;
@@ -371,5 +390,46 @@ public class OrderSection extends Fragment {
 
         }
     }
-
+    private class LoadEmailAndPassword extends AsyncTask<Void,Void,String[]> {
+        @Override
+        protected String[] doInBackground(Void...voidOb) {
+            String[] userNameAndPassword = {"",""};
+            Cursor prefCursor = getContext().getContentResolver().query(DatabaseContract.PREFERENCES_URI,
+                    new String[]{DatabaseContract.TablePreferences.COL_PREF_VALUE},
+                    "CAST (" + DatabaseContract.TablePreferences.COL_PREF_TYPE + " AS TEXT) = ?",
+                    new String[] {"2"},
+                    null
+            );
+            if(prefCursor != null && prefCursor.moveToLast()) {
+                if(prefCursor.getString(0) != null) {
+                    Log.d(LOG_TAG,"This is my first cursor result: " + prefCursor.getString(0));
+                    userNameAndPassword[0] = prefCursor.getString(0);
+                    prefCursor.close();
+                } else {
+                    Log.d(LOG_TAG,"My cursor was empty");
+                }
+            }
+            prefCursor = getContext().getContentResolver().query(DatabaseContract.PREFERENCES_URI,
+                    new String[]{DatabaseContract.TablePreferences.COL_PREF_VALUE},
+                    "CAST (" + DatabaseContract.TablePreferences.COL_PREF_TYPE + " AS TEXT) = ?",
+                    new String[] {"3"},
+                    null
+            );
+            if(prefCursor != null && prefCursor.moveToLast()) {
+                if(prefCursor.getString(0) != null) {
+                    Log.d(LOG_TAG,"This is my first cursor result: " + prefCursor.getString(0));
+                    userNameAndPassword[1] = prefCursor.getString(0);
+                    prefCursor.close();
+                } else {
+                    Log.d(LOG_TAG,"My cursor was empty");
+                }
+            }
+            return userNameAndPassword;
+        }
+        @Override
+        protected void onPostExecute(String[] userNameAndPassword) {
+            emailAddress = userNameAndPassword[0];
+            password = userNameAndPassword[1];
+        }
+    }
 }

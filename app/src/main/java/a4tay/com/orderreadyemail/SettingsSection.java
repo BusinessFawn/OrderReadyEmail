@@ -66,6 +66,9 @@ public class SettingsSection extends Fragment {
 
         final EditText body = (EditText) rootView.findViewById(R.id.et_email_body);
 
+        final EditText userName = (EditText) rootView.findViewById(R.id.et_user_name);
+        final EditText password = (EditText) rootView.findViewById(R.id.et_password);
+
         ip = (AutoCompleteTextView) rootView.findViewById(R.id.et_ip_value);
 
         subjects = new ArrayList<>();
@@ -118,6 +121,19 @@ public class SettingsSection extends Fragment {
             }
         });
 
+        final Button saveEmail = (Button) rootView.findViewById(R.id.bt_save_email_password);
+
+        saveEmail.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+
+
+                if(userName.getText() != null && !userName.getText().toString().equals("") && password.getText() != null && !password.getText().toString().equals("")) {
+                    SaveUnPw(userName.getText().toString(),password.getText().toString());
+                }
+            }
+        });
+
 
         new PreferenceShower().execute();
 
@@ -151,6 +167,20 @@ public class SettingsSection extends Fragment {
             ip.setText(ips.get(ips.size() -1 ));
             ip.clearFocus();
         }
+
+    }
+    private void SaveUnPw(String userName, String password) {
+        ContentValues userNameContent = new ContentValues();
+        userNameContent.put(DatabaseContract.TablePreferences.COL_PREF_TYPE,2);
+        userNameContent.put(DatabaseContract.TablePreferences.COL_PREF_VALUE,userName);
+
+        AddPreferenceService.insertNewPref(getContext(),userNameContent);
+
+        ContentValues passwordContent = new ContentValues();
+        passwordContent.put(DatabaseContract.TablePreferences.COL_PREF_TYPE,3);
+        passwordContent.put(DatabaseContract.TablePreferences.COL_PREF_VALUE,password);
+
+        AddPreferenceService.insertNewPref(getContext(),passwordContent);
 
     }
 

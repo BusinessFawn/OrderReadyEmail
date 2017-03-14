@@ -15,13 +15,15 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:id="@+id/sp_carrier_spinner"/>
+
     <EditText
+        android:id="@+id/editText3"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:id="@+id/editText3"
         android:hint="Phone Number"
-        android:singleLine="true"
-        android:inputType="numberDecimal" />
+        android:inputType="numberDecimal"
+        android:singleLine="true" />
+
     <EditText
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
